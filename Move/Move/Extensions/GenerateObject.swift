@@ -36,15 +36,12 @@ extension ViewController {
         }
     }
     
-    func generate(_ i: Int, characterOf type: Type) {
-        for _ in 1...i {
-            let character = CharacterClass()
-            let position = randomCharacterPosition(of: type)
-            existingPositions.append(position)
-            startPositions.append(position)
-            character.create(with: characterLength, at: position, of: type)
-            characters.append(character)
-            gridView.addSubview(character)
-        }
+    func generateCharacter(Of type: Type, at position: Position) {
+        let character = CharacterClass()
+        existingPositions.append(position)
+        startPositions.append(position)
+        character.create(with: characterLength, at: position, of: type)
+        characters.append(character)
+        gridView.addSubview(character)
     }
 }

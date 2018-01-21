@@ -17,9 +17,9 @@ enum Type {
     var colour: Colour {
         get {
             switch self {
-            case .red: return Colour(254,0,0)
-            case .green: return Colour(11,255,1)
-            case .blue: return Colour(1,30,254)
+            case .red: return Colour(226,34,17)
+            case .green: return Colour(146,242,42)
+            case .blue: return Colour(68,187,255)
             case .custom: return Colour(0, 0, 0)
             }
         }

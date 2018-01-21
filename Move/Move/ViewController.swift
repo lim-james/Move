@@ -5,15 +5,17 @@ class ViewController: UIViewController {
     var width: CGFloat!
     var height: CGFloat!
     
-    let tilesPerRow: CGFloat = 4 // x
-    let tilesPerColumn: CGFloat = 4 // y
+    var level = 0
+    
+    var tilesPerRow: CGFloat = 3 // x
+    var tilesPerColumn: CGFloat = 4 // y
     
     var tileLength: CGFloat!
     var tiles = [[UIButton]]()
     
     var gridWidth: CGFloat!
     var gridHeight: CGFloat!
-    var gridView: UIView!
+    var gridView = UIView()
     
     var characterLength: CGFloat!
     
@@ -36,30 +38,64 @@ class ViewController: UIViewController {
         tileLength = width/5
         characterLength = tileLength/2
         
+        setup()
+    }
+    
+    func setup() {
+        clearView()
+        if level <= 14 {
+            create(level: level, with: contents(of: "Levels"))
+        }
+        
         gridWidth = width * tilesPerRow/5
         gridHeight = width * tilesPerColumn/5
-        gridView = UIView()
         gridView.frame.size = CGSize(width: gridWidth, height: gridHeight)
         gridView.center = view.center
         gridView.layer.borderWidth = 1
         gridView.layer.borderColor = UIColor.border.cgColor
+        gridView.alpha = 0
         view.addSubview(gridView)
         
-        for _ in 0...1 {
-            let position = randomBlockPosition()
-            blocks.append(position)
-            existingPositions.append(position)
+        UIView.animate(withDuration: 0.5) {
+            self.gridView.alpha = 1
         }
         
-        endPositions.append(EndPosition(position: randomEndPosition(), type: .red))
-        endPositions.append(EndPosition(position: randomEndPosition(), type: .green))
-        endPositions.append(EndPosition(position: randomEndPosition(), type: .blue))
-        
-        generate(2, characterOf: .red)
-        generate(2, characterOf: .green)
-        generate(2, characterOf: .blue)
-        
+        if level > 14 {
+            for _ in 0...1 {
+                let position = randomBlockPosition()
+                blocks.append(position)
+                existingPositions.append(position)
+            }
+            
+            endPositions.append(EndPosition(position: randomEndPosition(), type: .red))
+            endPositions.append(EndPosition(position: randomEndPosition(), type: .green))
+            endPositions.append(EndPosition(position: randomEndPosition(), type: .blue))
+            
+            generateCharacter(Of: .red, at: randomCharacterPosition(of: .red))
+            generateCharacter(Of: .green, at: randomCharacterPosition(of: .green))
+            generateCharacter(Of: .blue, at: randomCharacterPosition(of: .blue))
+
+        }
         generateTiles()
+        
+        generateFile()
+    }
+    
+    func clearView() {
+        for ti in tiles {
+            for t in ti {
+                t.removeFromSuperview()
+            }
+        }
+        tiles = []
+        existingPositions = []
+        blocks = []
+        startPositions = []
+        endPositions = []
+        for c in characters {
+            c.removeFromSuperview()
+        }
+        characters = []
     }
     
     @objc func tileAction(_ sender: UIButton) {
@@ -77,11 +113,14 @@ class ViewController: UIViewController {
                         UIView.animate(withDuration: 0.5, animations: {
                             self.tiles[Int(c1.position.x)][Int(c1.position.y)].backgroundColor = c1.backgroundColor
                         })
+                        if isComplete() {
+                            correct()
+                        }
                     }
                     
                     for c2 in characters {
                         if c1.type != c2.type && didCollide(between: c1.position, and: c2.position) {
-                            end()
+                            wrong()
                         }
                     }
                 }
@@ -101,12 +140,37 @@ class ViewController: UIViewController {
         return position
     }
     
+    func isComplete() -> Bool {
+        var tested = 0
+        for c in characters {
+            if let i = endPositions.index(where: { (end) -> Bool in
+                return didCollide(between: end.position, and: c.position)
+            }) {
+                if endPositions[i].type != c.type {
+                    return false
+                } else {
+                    tested += 1
+                }
+            }
+        }
+        return tested == characters.count
+    }
+    
     func didCollide(between a: Position, and b: Position) -> Bool {
         return a.x == b.x && a.y == b.y
     }
     
-    func end() {
-        view.backgroundColor = .red
+    func wrong() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.setup()
+        }
+    }
+    
+    func correct() {
+        level += 1
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.setup()
+        }
     }
     
     override var prefersStatusBarHidden: Bool {

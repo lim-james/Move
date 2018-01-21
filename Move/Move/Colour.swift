@@ -40,6 +40,6 @@ extension UIColor {
     }
     
     static var border: UIColor {
-        return UIColor(253,254,2)
+        return UIColor(50, 50, 50)
     }
 }
