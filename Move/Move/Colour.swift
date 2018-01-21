@@ -12,9 +12,13 @@ struct Colour {
     var red: CGFloat
     var green: CGFloat
     var blue: CGFloat
-}
-
-extension Colour {
+    
+    init(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) {
+        red = r
+        green = g
+        blue = b
+    }
+    
     mutating func setColour(_ c: Colour) {
         red = c.red
         green = c.green
@@ -22,10 +26,20 @@ extension Colour {
     }
     
     var value: UIColor {
-        return UIColor(red: red/255, green: green/255, blue: blue/255, alpha: 1)
+        return UIColor(red, green, blue)
+    }
+}
+
+extension UIColor {
+    convenience init(_ r: CGFloat, _ g: CGFloat, _ b: CGFloat) {
+        self.init(red: r/255, green: g/255, blue: b/255, alpha: 1)
+    }
+
+    static var background: UIColor {
+        return UIColor(0,0,0)
     }
     
-//    func blend(with c2: Colour) -> Colour {
-//        return Colour(red: (red + c2.red)/2, green: (green + c2.green)/2, blue: (blue + c2.blue)/2)
-//    }
+    static var border: UIColor {
+        return UIColor(253,254,2)
+    }
 }

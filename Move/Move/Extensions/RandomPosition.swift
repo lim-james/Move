@@ -9,20 +9,21 @@
 import UIKit
 
 extension ViewController {
-    func randomEndPosition() -> Position {
+    func randomBlockPosition() -> Position {
         var x: CGFloat = CGFloat(arc4random_uniform(UInt32(tilesPerRow)));
         var y: CGFloat = CGFloat(arc4random_uniform(UInt32(tilesPerColumn)));
-        while endPositions.contains(where: { didCollide(between: $0.position, and: Position(x: x, y: y)) }) {
+        while existingPositions.contains(where: { didCollide(between: $0, and: Position(x: x, y: y)) }) {
             x = CGFloat(arc4random_uniform(UInt32(tilesPerRow)))
             y = CGFloat(arc4random_uniform(UInt32(tilesPerRow)))
         }
         return Position(x: x, y: y)
     }
     
-    func randomBlockPosition() -> Position {
+    func randomEndPosition() -> Position {
         var x: CGFloat = CGFloat(arc4random_uniform(UInt32(tilesPerRow)));
         var y: CGFloat = CGFloat(arc4random_uniform(UInt32(tilesPerColumn)));
-        while existingPositions.contains(where: { didCollide(between: $0, and: Position(x: x, y: y)) }) {
+        while endPositions.contains(where: { didCollide(between: $0.position, and: Position(x: x, y: y)) }) ||
+            existingPositions.contains(where: { didCollide(between: $0, and: Position(x: x, y: y)) }) {
             x = CGFloat(arc4random_uniform(UInt32(tilesPerRow)))
             y = CGFloat(arc4random_uniform(UInt32(tilesPerRow)))
         }

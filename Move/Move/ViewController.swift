@@ -5,7 +5,7 @@ class ViewController: UIViewController {
     var width: CGFloat!
     var height: CGFloat!
     
-    let tilesPerRow: CGFloat = 3 // x
+    let tilesPerRow: CGFloat = 4 // x
     let tilesPerColumn: CGFloat = 4 // y
     
     var tileLength: CGFloat!
@@ -28,7 +28,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .black
+        view.backgroundColor = .background
         
         width = view.frame.width
         height = view.frame.height
@@ -42,14 +42,18 @@ class ViewController: UIViewController {
         gridView.frame.size = CGSize(width: gridWidth, height: gridHeight)
         gridView.center = view.center
         gridView.layer.borderWidth = 1
-        gridView.layer.borderColor = UIColor.white.cgColor
+        gridView.layer.borderColor = UIColor.border.cgColor
         view.addSubview(gridView)
-    
+        
+        for _ in 0...1 {
+            let position = randomBlockPosition()
+            blocks.append(position)
+            existingPositions.append(position)
+        }
+        
         endPositions.append(EndPosition(position: randomEndPosition(), type: .red))
         endPositions.append(EndPosition(position: randomEndPosition(), type: .green))
         endPositions.append(EndPosition(position: randomEndPosition(), type: .blue))
-        
-        blocks.append(randomBlockPosition())
         
         generate(2, characterOf: .red)
         generate(2, characterOf: .green)
@@ -73,6 +77,12 @@ class ViewController: UIViewController {
                         UIView.animate(withDuration: 0.5, animations: {
                             self.tiles[Int(c1.position.x)][Int(c1.position.y)].backgroundColor = c1.backgroundColor
                         })
+                    }
+                    
+                    for c2 in characters {
+                        if c1.type != c2.type && didCollide(between: c1.position, and: c2.position) {
+                            end()
+                        }
                     }
                 }
             }

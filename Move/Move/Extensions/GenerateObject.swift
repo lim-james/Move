@@ -19,12 +19,12 @@ extension ViewController {
                 tile.tag = Int((xPosition) * 10 + (yPosition))
                 tile.addTarget(self, action: #selector(self.tileAction(_:)), for: .touchUpInside)
                 tile.layer.borderWidth = 0.5
-                tile.layer.borderColor = UIColor.white.cgColor
+                tile.layer.borderColor = UIColor.border.cgColor
                 tileBuffer.append(tile)
                 gridView.addSubview(tile)
                 
                 if blocks.contains(where: { $0.x == CGFloat(x) && $0.y == CGFloat(y) }) {
-                    tile.backgroundColor = .white
+                    tile.backgroundColor = .border
                 }
                 if let index = endPositions.index(where: { (end) -> Bool in
                     return didCollide(between: end.position, and: Position(x: xPosition, y: yPosition))
