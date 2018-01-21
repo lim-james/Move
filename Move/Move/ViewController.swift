@@ -1,11 +1,3 @@
-//
-//  ViewController.swift
-//  Move
-//
-//  Created by James on 20/1/18.
-//  Copyright © 2018 james. All rights reserved.
-//
-
 import UIKit
 
 class ViewController: UIViewController {
@@ -13,7 +5,11 @@ class ViewController: UIViewController {
     var width: CGFloat!
     var height: CGFloat!
     
+    let tilesPerRow: CGFloat = 3 // x
+    let tilesPerColumn: CGFloat = 4 // y
+    
     var tileLength: CGFloat!
+    var tiles = [[UIButton]]()
     
     var gridWidth: CGFloat!
     var gridHeight: CGFloat!
@@ -21,14 +17,14 @@ class ViewController: UIViewController {
     
     var characterLength: CGFloat!
     
-    var existingPosition = [Position]()
+    var existingPositions = [Position]() // inclusive of blocks and start
     
-    var blocks = [Position(x: 1, y: 2),
-                  Position(x: 1, y: 3),]
+    var blocks = [Position]()
     
-    var player = PlayerClass()
+    var startPositions = [Position]()
+    var endPositions = [EndPosition]()
     
-    var enemies = [EnemyClass]()
+    var characters = [CharacterClass]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -37,57 +33,47 @@ class ViewController: UIViewController {
         width = view.frame.width
         height = view.frame.height
         
-        gridWidth = width * 3/5
-        gridHeight = width * 4/5
+        tileLength = width/5
+        characterLength = tileLength/2
+        
+        gridWidth = width * tilesPerRow/5
+        gridHeight = width * tilesPerColumn/5
         gridView = UIView()
         gridView.frame.size = CGSize(width: gridWidth, height: gridHeight)
         gridView.center = view.center
         gridView.layer.borderWidth = 1
         gridView.layer.borderColor = UIColor.white.cgColor
         view.addSubview(gridView)
-        
-        tileLength = width/5
-        generateTiles()
-        
-        characterLength = tileLength/2
-        
-        player.create(with: characterLength, at: Position(x: CGFloat(arc4random_uniform(3)), y: CGFloat(arc4random_uniform(4))))
-        gridView.addSubview(player)
-        
-        for _ in 0...3 {
-            let enemy = EnemyClass()
-            enemy.create(with: characterLength, at: Position(x: CGFloat(arc4random_uniform(3)), y: CGFloat(arc4random_uniform(4))))
-            enemies.append(enemy)
-            gridView.addSubview(enemy)
-        }
-    }
     
-    func generateTiles() {
-        for x in 0...2 {
-            for y in 0...3 {
-                let xPosition = CGFloat(x)
-                let yPosition = CGFloat(y)
-                let tile = UIButton(frame: CGRect(x: xPosition*tileLength, y: yPosition*tileLength, width: tileLength, height: tileLength))
-                tile.tag = Int((xPosition) * 10 + (yPosition))
-                tile.addTarget(self, action: #selector(self.tileAction(_:)), for: .touchUpInside)
-                if blocks.contains(where: { $0.x == CGFloat(x) && $0.y == CGFloat(y) }) {
-                    tile.backgroundColor = .white
-                }
-                tile.layer.borderWidth = 0.5
-                tile.layer.borderColor = UIColor.white.cgColor
-                gridView.addSubview(tile)
-            }
-        }
+        endPositions.append(EndPosition(position: randomEndPosition(), type: .red))
+        endPositions.append(EndPosition(position: randomEndPosition(), type: .green))
+        endPositions.append(EndPosition(position: randomEndPosition(), type: .blue))
+        
+        blocks.append(randomBlockPosition())
+        
+        generate(2, characterOf: .red)
+        generate(2, characterOf: .green)
+        generate(2, characterOf: .blue)
+        
+        generateTiles()
     }
     
     @objc func tileAction(_ sender: UIButton) {
         let position = coordinateOf(sender.tag)
         if !blocks.contains(where: { $0.x == position.x && $0.y == position.y }) {
-            player.move(to: position)
-            for e in enemies {
-                e.move(to: position)
-                if didCollide(between: e, and: player) {
-                    end()
+            for c1 in characters {
+                if c1.movable == true {
+                    c1.move(to: position)
+                    
+                    if let _ = endPositions.index(where: { (end) -> Bool in
+                        return didCollide(between: end.position, and: c1.position) && end.type == c1.type
+                    }) {
+                        c1.movable = false
+                        blocks.append(c1.position)
+                        UIView.animate(withDuration: 0.5, animations: {
+                            self.tiles[Int(c1.position.x)][Int(c1.position.y)].backgroundColor = c1.backgroundColor
+                        })
+                    }
                 }
             }
         }
@@ -105,12 +91,8 @@ class ViewController: UIViewController {
         return position
     }
     
-    func randomPosition() -> Position {
-        return Position(x: 0, y: 0)
-    }
-    
-    func didCollide(between a: CharacterClass, and b: CharacterClass) -> Bool {
-        return a.position.x == b.position.x && a.position.y == b.position.y
+    func didCollide(between a: Position, and b: Position) -> Bool {
+        return a.x == b.x && a.y == b.y
     }
     
     func end() {

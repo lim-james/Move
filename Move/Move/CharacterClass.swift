@@ -1,10 +1,7 @@
-//
-//  CharacterClass.swift
-//  Move
-//
-//  Created by James on 20/1/18.
-//  Copyright © 2018 james. All rights reserved.
-//
+// Merge Cells
+// Different end points
+// Fewest Moves
+
 
 import UIKit
 
@@ -12,15 +9,17 @@ class CharacterClass: UIView {
     
     var length: CGFloat!
     var position: Position!
-    
-    var padding: CGFloat!
+    var type: Type!
+    var movable = true
 
-    func create(with newLength: CGFloat, at newPosition: Position) {
+    func create(with newLength: CGFloat, at newPosition: Position, of newType: Type) {
         length = newLength
         position = newPosition
+        type = newType
         
         frame.size = CGSize(width: length, height: length)
         center = screenPosition(of: position)
+        backgroundColor = type.colour.value
     }
     
     func move(to newPosition: Position) {
