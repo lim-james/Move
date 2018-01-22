@@ -28,6 +28,8 @@ class ViewController: UIViewController {
     
     var characters = [CharacterClass]()
     
+    var resetButton = UIButton()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .background
@@ -39,6 +41,11 @@ class ViewController: UIViewController {
         characterLength = tileLength/2
         
         setup()
+        
+        resetButton.frame = CGRect(x: 0, y: height - 64, width: width, height: 64)
+        resetButton.setTitle("Reset", for: .normal)
+        resetButton.addTarget(self, action: #selector(self.resetAction), for: .touchUpInside)
+        view.addSubview(resetButton)
     }
     
     func setup() {
@@ -127,6 +134,10 @@ class ViewController: UIViewController {
             }
         }
     }
+    
+    @objc func resetAction() {
+        setup()
+    }
 
     func coordinateOf(_ i: Int) -> Position {
         var position = Position()
@@ -141,7 +152,8 @@ class ViewController: UIViewController {
     }
     
     func isComplete() -> Bool {
-        var tested = 0
+        var endIndexes = [Int]()
+        var charactersTested = 0
         for c in characters {
             if let i = endPositions.index(where: { (end) -> Bool in
                 return didCollide(between: end.position, and: c.position)
@@ -149,11 +161,14 @@ class ViewController: UIViewController {
                 if endPositions[i].type != c.type {
                     return false
                 } else {
-                    tested += 1
+                    if !endIndexes.contains(i) {
+                        endIndexes.append(i)
+                    }
+                    charactersTested += 1
                 }
             }
         }
-        return tested == characters.count
+        return charactersTested == characters.count && endIndexes.count == endPositions.count
     }
     
     func didCollide(between a: Position, and b: Position) -> Bool {
